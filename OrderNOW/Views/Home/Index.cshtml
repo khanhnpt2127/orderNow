@@ -1,0 +1,134 @@
+﻿@{
+    ViewBag.Title = "Welcome On Board";
+}
+
+<div id="on-boarding" class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Snacks and drinks ({{products.length}})</h3>
+        </div>
+        <div class="col-md-6 text-right">
+            <h3 class="clickable" data-toggle="modal" data-target="#my-bill"><span class="glyphicon glyphicon-shopping-cart"></span>You have to pay {{totalPrice}} VND for {{totalQuantity}} item(s)</h3>
+        </div>
+    </div>
+
+    <div id="product-container">
+        <div v-for="item in products" class="item product-item">
+            <h3>{{item.name}}</h3>
+
+            <p class="price"><span class="glyphicon glyphicon-fire"></span> {{item.price}} VND</p>
+            <span v-on:click="addOrder(item)" class="glyphicon glyphicon-plus-sign add-to-cart clickable"></span>
+        </div>
+    </div>
+    <div class="modal fade" id="my-bill" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">My Reciept</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-responsive table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-if="cart.length > 0" v-for="p in cart">
+                                <td>{{p.name}}</td>
+                                <td>{{p.quantity}}</td>
+                                <td>{{p.price}}</td>
+                                <th><span v-on:click="removeOrder(p)" class="clickable glyphicon glyphicon-trash"></span></th>
+                            </tr>
+                            <tr v-if="cart.length == 0" class="text-center">
+                                <td colspan="3"><strong>Bạn chưa chọn món nào cả</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary">Submit Your Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        var app = new Vue({
+            el: "#on-boarding",
+            data: {
+                categories: [
+                    { id: 1, name: 'Tea & Coffee' },
+                    { id: 2, name: 'Snack & Chip' },
+                    { id: 3, name: 'Fried Fruits' },
+                    { id: 4, name: 'Uncategorized' }
+                ],
+                products: [
+                    { id: 1, name: 'Phin Sữa Đá (Highland)', categoryId: 1, price: 29000 },
+                    { id: 2, name: 'Freeze Trà Xanh (Highland)', categoryId: 1, price: 59000 },
+                    { id: 3, name: 'Freeze Chocolate (Highland)', categoryId: 1, price: 59000 },
+                    { id: 4, name: 'Freeze Caramel (Highland)', categoryId: 1, price: 59000 },
+                    { id: 5, name: 'Trà Sen Vàng (Highland)', categoryId: 1, price: 59000 },
+                    { id: 6, name: 'Chocolate Nóng (Highland)', categoryId: 1, price: 39000 },
+                    { id: 7, name: 'Đậu Hà-Lan Tỏi', categoryId: 2, price: 160000 },
+                    { id: 8, name: 'Đậu Hà-Lan Muối', categoryId: 2, price: 120000 }
+                ],
+                cart: []
+            },
+            methods: {
+                addOrder: function (product) {
+                    var found = this.cart.find(function (item) {
+                        return item.id === product.id;
+                    });
+                    if (found) {
+                        found.quantity += 1;
+                        this.$set(this.cart, this.cart.indexOf(product), found);
+                        return;
+                    }
+                    product.quantity = 1;
+                    this.cart.push(product);
+                },
+                removeOrder: function (product) {
+                    var index = this.cart.indexOf(product)
+                    this.cart.splice(index, 1);
+                }
+            },
+            computed: {
+                indicators: function () {
+                    var total = this.products.length;
+                    return Math.round(total / 6) + ((total % 6) >= 1 ? 1 : 0);
+                },
+                indicatorItems: function () {
+                    var array = [];
+                    for (var i = 0; i < this.indicators; i++) {
+                        array.push(i);
+                    }
+                    return array;
+                },
+                totalPrice: function () {
+                    var result = 0;
+                    this.cart.forEach(function (item) {
+                        result += item.price;
+                    })
+                    return result;
+                },
+                totalQuantity: function () {
+                    var result = 0;
+                    this.cart.forEach(function (item) {
+                        result += item.quantity;
+                    })
+                    return result;
+                }
+            }
+        });
+    </script>
+
+}
